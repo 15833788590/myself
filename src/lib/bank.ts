@@ -20,6 +20,7 @@ export function transform(slug: string, raw: any): Bank {
       questions.push({
         id: `${slug}:${ui}:${q.type}:${q.no}`,
         bank: slug, unit: ui, kind: q.type, no: q.no,
+        labelStyle: q.type === "multi" && /[\u2460-\u2464]/.test(q.answer || "") ? "circled" : "letters",
         stem: q.stem, options: q.options || [], answer: q.answer,
       });
     });

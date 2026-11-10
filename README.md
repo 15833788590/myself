@@ -65,3 +65,9 @@ bank JSON 结构：
 - `src/lib/bank.ts` 题库加载；`src/lib/db.ts` SQLite；`src/lib/auth.ts` 会话
 - `data/banks/` 题库数据；`data/app.db` 运行时生成
 - `tools/parse_bank.py` 题库解析脚本
+
+## 已内置题库
+- 《内经选读》（slug: `neijing-xuandu`）：解析器 `tools/parse_bank.py`，源自《内经选读》习题库及标准答案.doc
+- 毛概（slug: `maogai`）：解析器 `tools/parse_maogai.py`，源自 `毛概率数据/` 内 6 个 docx（导论、第一章、理论体系形成发展、第六章、第七章、第八章；198 题）
+
+多选题答案标签按题库自适应（①-⑤ 或 A-D），由 `src/lib/bank.ts` 根据答案字符自动判定。

@@ -22,7 +22,11 @@ export default function BanksPage() {
             <span className="flex-1">
               <span className="block font-semibold">{b.title}</span>
               <span className="block text-xs text-stone-500">
-                单选{b.counts.single} · 多选{b.counts.multi} · 简答{b.counts.short} · 论述{b.counts.essay} · 术语{b.counts.terms}
+                {(["单选", "多选", "简答", "论述", "术语"] as const).map((label, i) => {
+                  const v = [b.counts.single, b.counts.multi, b.counts.short, b.counts.essay, b.counts.terms][i];
+                  return v > 0 ? `${label}${v}` : null;
+                }).filter(Boolean).join(" · ")}
+                 · {b.unitTitles.length} 个章节
               </span>
             </span>
             <ChevronRight size={18} className="text-stone-400" />

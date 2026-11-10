@@ -5,6 +5,7 @@ export interface Question {
   bank: string;
   unit: number;
   kind: QKind;
+  labelStyle?: "letters" | "circled";
   no: number;
   stem: string;
   options: string[];

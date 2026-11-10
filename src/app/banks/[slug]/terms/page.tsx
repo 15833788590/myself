@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Star } from "lucide-react";
 import { NavBar, useMe } from "@/components/ui";
 import { fetchBank, shuffle } from "@/lib/client";
@@ -17,6 +17,9 @@ export default function TermsPage() {
   const [draft, setDraft] = useState("");
   const [revealed, setRevealed] = useState(false);
   const [idx, setIdx] = useState(0);
+  const stateKey = `${slug}:terms:${unit}`;
+  const triedRestore = useRef(false);
+  const resumeReady = useRef(false);
 
   useEffect(() => { fetchBank(slug).then(setBank).catch(() => {}); }, [slug]);
   useEffect(() => {
@@ -41,7 +44,29 @@ export default function TermsPage() {
     return l;
   }, [bank, unit, rand, order, slug]);
 
-  useEffect(() => { setDraft(""); setRevealed(false); setIdx(0); }, [unit, rand, order]);
+  useEffect(() => { setDraft(""); setRevealed(false); setIdx(0); triedRestore.current = false; resumeReady.current = false; }, [unit, rand, order]);
+
+  useEffect(() => {
+    if (triedRestore.current || !bank || list.length === 0) return;
+    triedRestore.current = true;
+    fetch(`/api/state?key=` + encodeURIComponent(stateKey))
+      .then(r => (r.ok ? r.json() : {}))
+      .then((d: any) => {
+        if (typeof d.idx === "number" && d.idx > 0 && d.idx < list.length) setIdx(d.idx);
+        resumeReady.current = true;
+      })
+      .catch(() => { resumeReady.current = true; });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bank, list, stateKey]);
+
+  useEffect(() => {
+    if (!resumeReady.current) return;
+    fetch("/api/state", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: stateKey, idx }),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, stateKey]);
   useEffect(() => { setDraft(""); setRevealed(false); window.scrollTo(0, 0); }, [idx]);
 
   if (!user || !bank) return <div className="p-8 text-center text-stone-400">加载中…</div>;

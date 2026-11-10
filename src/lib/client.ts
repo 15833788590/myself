@@ -49,7 +49,7 @@ export function circled(i: number) {
 }
 
 export function optionLabel(q: Question, i: number) {
-  return q.kind === "multi" ? circled(i) : letters(i);
+  return q.kind === "multi" && (q.labelStyle ?? "circled") === "circled" ? circled(i) : letters(i);
 }
 
 export function parseAnswerSet(ans: string) {

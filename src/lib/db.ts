@@ -38,6 +38,13 @@ export function db(): DatabaseSync {
       created_at INTEGER NOT NULL,
       PRIMARY KEY(user_id, qid)
     );
+    CREATE TABLE IF NOT EXISTS practice_state(
+      user_id INTEGER NOT NULL,
+      key TEXT NOT NULL,
+      idx INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      PRIMARY KEY(user_id, key)
+    );
     CREATE TABLE IF NOT EXISTS exams(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,

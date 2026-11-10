@@ -25,6 +25,9 @@ function PracticeInner() {
   const [showRef, setShowRef] = useState(false);
   const [draft, setDraft] = useState("");
   const orderRef = useRef<string | null>(null);
+  const stateKey = `${slug}:${mode}:${unitParam ?? "all"}`;
+  const triedRestore = useRef(false);
+  const resumeReady = useRef(false);
 
   useEffect(() => { fetchBank(slug).then(setBank).catch(() => {}); }, [slug]);
   useEffect(() => {
@@ -69,6 +72,27 @@ function PracticeInner() {
       }
     }
   }, [jump, bank, mode, unitParam]);
+
+  useEffect(() => {
+    if (triedRestore.current || !bank || list.length === 0) return;
+    triedRestore.current = true;
+    if (jump) { resumeReady.current = true; return; }
+    fetch(`/api/state?key=` + encodeURIComponent(stateKey))
+      .then(r => (r.ok ? r.json() : {}))
+      .then((d: any) => {
+        if (typeof d.idx === "number" && d.idx > 0 && d.idx < list.length) setIdx(d.idx);
+        resumeReady.current = true;
+      })
+      .catch(() => { resumeReady.current = true; });
+  }, [bank, list, jump, stateKey]);
+
+  useEffect(() => {
+    if (!resumeReady.current) return;
+    fetch("/api/state", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: stateKey, idx }),
+    });
+  }, [idx, stateKey]);
 
   const q = list[idx];
   useEffect(() => { setPicked(new Set()); setChecked(null); setShowRef(false); setDraft(""); window.scrollTo(0, 0); }, [idx, q?.id]);
@@ -140,6 +164,9 @@ function PracticeInner() {
           <span className="badge bg-stone-100 text-stone-500">{bank.unitTitles[q.unit]}</span>
           <span className="badge bg-stone-100 text-stone-400">第{q.no}题</span>
           {mode === "recite" && <span className="badge bg-sky-100 text-sky-700">背题</span>}
+          {answered && checked == null && mode !== "recite" && (
+            <span className={`badge ${progress[q.id] ? "bg-brand-100 text-brand-700" : "bg-red-100 text-red-600"}`}>{progress[q.id] ? "上次答对" : "上次答错"}</span>
+          )}
         </div>
         <p className="whitespace-pre-wrap text-[15px] leading-7">{q.stem}</p>
 
